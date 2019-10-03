@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+
+    <services>
+
+        <service id="salty_update_currency_rates.subscriber.template_registration" class="saltyUpdateCurrencyRates\Subscriber\TemplateRegistration">
+            <argument>%salty_update_currency_rates.plugin_dir%</argument>
+            <argument type="service" id="template"/>
+            <tag name="shopware.event_subscriber"/>
+        </service>
+
+        <service id="salty_update_currency_rates.subscriber.backend" class="saltyUpdateCurrencyRates\Subscriber\Backend">
+            <argument type="service" id="service_container" />
+            <tag name="shopware.event_subscriber" />
+        </service>
+
+        <service id="salty_update_currency_rates.subscriber.cron" class="saltyUpdateCurrencyRates\Subscriber\Cron">
+            <argument type="service" id="salty_update_currency_rates.services.rates"/>
+            <tag name="shopware.event_subscriber" />
+        </service>
+
+        <service id="salty_update_currency_rates.commands.update_currency_rates" class="saltyUpdateCurrencyRates\Commands\UpdateCurrencyRates">
+            <tag name="console.command" />
+            <argument type="service" id="salty_update_currency_rates.services.connection_curl"/>
+            <argument type="service" id="salty_update_currency_rates.services.rates"/>
+        </service>
+
+        <service class="saltyUpdateCurrencyRates\Services\ConnectionCurl" id="salty_update_currency_rates.services.connection_curl">
+            <argument type="string">https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml</argument>
+            <argument type="service" id="salty_update_currency_rates.services.ezbxml"/>
+        </service>
+
+        <service class="saltyUpdateCurrencyRates\Services\EZBXML" id="salty_update_currency_rates.services.ezbxml"/>
+
+        <service class="saltyUpdateCurrencyRates\Services\Rates" id="salty_update_currency_rates.services.rates">
+            <argument type="service" id="models"/>
+            <argument type="string">Shopware\Models\Shop\Currency</argument>
+            <argument type="service" id="salty_update_currency_rates.services.connection_curl"/>
+        </service>
+
+
+    </services>
+</container>
